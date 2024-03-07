@@ -13,7 +13,6 @@ class App(customtkinter.CTk):
         self.warning = None
         self.extension_values = ['Default', "webm", "mp4"]
 
-        self.iconbitmap('assets/icon.ico')
         self.title("YouTube Video Downloader 3000")
 
         self.load_side_bar()
@@ -128,8 +127,16 @@ class App(customtkinter.CTk):
         resolution_element = ET.SubElement(root, "resolution")
         resolution_element.text = self.resolution.get()
 
-        path_element = ET.SubElement(root, "output_folder")
-        path_element.text = self.path.get()
+        path_value = self.path.get()
+
+        # Set the default output folder to the download folder of the current user
+        if not path_value:
+            default_download_folder = os.path.join(os.path.expanduser("~"), "Downloads")
+            path_element = ET.SubElement(root, "output_folder")
+            path_element.text = default_download_folder
+        else:
+            path_element = ET.SubElement(root, "output_folder")
+            path_element.text = path_value
 
         # Convert to a formatted string
         xml_str = minidom.parseString(ET.tostring(root)).toprettyxml(indent="  ")
@@ -137,6 +144,8 @@ class App(customtkinter.CTk):
         # Write the formatted string to an XML file
         with open("settings.xml", "w") as xml_file:
             xml_file.write(xml_str)
+
+        self.load_default_settings()
 
     def select_details(self):
         if self.download_details is None or not self.download_details.winfo_exists():

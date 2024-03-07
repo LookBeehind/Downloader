@@ -9,11 +9,12 @@ def on_progress(d):
 
 def download(url, path, video_resolution=1080, ext='Default', form='Video + Audio'):
 
+    ffmpeg_loc = 'C:/ffmpeg/bin'
     if form == 'Video + Audio':
         ydl_opts = {
             'format': f'bestvideo[height<={video_resolution}]+bestaudio/best[height<={video_resolution}]',
             'outtmpl': f'{path}/%(title)s.%(ext)s',
-            'ffmpeg_location': 'C:/ffmpeg/bin',
+            'ffmpeg_location': ffmpeg_loc,
             'max_retries': 5,
         }
 
@@ -37,7 +38,7 @@ def download(url, path, video_resolution=1080, ext='Default', form='Video + Audi
                 'preferredcodec': 'mp3',
                 'preferredquality': '192',
             }],
-            'ffmpeg_location': 'C:/ffmpeg/bin',
+            'ffmpeg_location': ffmpeg_loc,
             'max_retries': 5,
         }
 
