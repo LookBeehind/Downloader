@@ -1,5 +1,11 @@
 # Youtue Video Downloader 3000
 
+1. pip install customtkinter
+2. pip install yt-dlp
+3. You will also need to install ffmpeg and specify the bin folder location in "downloader.py"
+
+![img.png](assets/img_2.png)
+
 Link specification: 
 
 Simple youtube video URL will download the video.
