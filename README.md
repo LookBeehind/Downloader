@@ -1,8 +1,7 @@
 # Youtue Video Downloader 3000
 
-1. pip install customtkinter
-2. pip install yt-dlp
-3. You will also need to install ffmpeg and specify the bin folder location in "downloader.py" - https://github.com/BtbN/FFmpeg-Builds/releases
+1. pip install -r .\requirements.txt
+2. You will also need to install ffmpeg and specify the bin folder location in "downloader.py" - https://github.com/BtbN/FFmpeg-Builds/releases
 
 ![img.png](assets/img_2.png)
 
