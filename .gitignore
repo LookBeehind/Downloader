@@ -3,3 +3,5 @@
 main.spec
 **/build/
 **/dist/
+downloaded.txt
+settings.xml
