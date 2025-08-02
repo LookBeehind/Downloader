@@ -7,15 +7,15 @@
 
 Link specification: 
 
-Simple youtube video URL will download the video.
+Simple YouTube video URL will download the video.
 
-Link to a video within a playlist - will download full playlist.
+Link to a video within a playlist - will download 100 videos from the playlist.
 
-Link to a playlist will download the playlist.
+Link to a playlist will download the whole playlist.
 
 ![img.png](assets/img.png)
 
-If you don't specify the Download Options, it will be downloaded by it's defaults, in to your "Downloads" folder.
+If you don't specify the Download Options, it will be downloaded by its defaults, in to your "Downloads" folder.
 
 By Selecting "Video + Audio", you can get the original video, or you can select "Video" - with no audio, or "Audio" - with no video.
 
