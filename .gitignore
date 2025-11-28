@@ -3,6 +3,8 @@
 main.spec
 **/build/
 **/dist/
+venv
+.venv
 downloaded.txt
 settings.xml
 playlists.txt

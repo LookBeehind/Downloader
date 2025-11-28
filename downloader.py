@@ -8,6 +8,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 import time
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
+from config import FFMPEG_LOC
+
 
 def on_progress(d):
     if d['status'] == 'finished':
@@ -35,7 +37,6 @@ def remove_list_param(url: str) -> str:
 def download(
     url: str, path: str, video_resolution: int = 1080, ext: str = 'Default', form: str = 'Video + Audio'
 ) -> None:
-    ffmpeg_loc = 'C:/ffmpeg/bin'
     # Common options across all formats
     common_opts = {
         'outtmpl': f'{path}/%(title)s.%(ext)s',
@@ -47,7 +48,7 @@ def download(
     if form == 'Video + Audio':
         ydl_opts = {
             'format': f'bestvideo[height<={video_resolution}]+bestaudio/best[height<={video_resolution}]',
-            'ffmpeg_location': ffmpeg_loc,
+            'ffmpeg_location': FFMPEG_LOC,
         }
         if ext != 'Default':
             ydl_opts['postprocessors'] = [{
@@ -66,7 +67,7 @@ def download(
                 'preferredcodec': 'mp3',
                 'preferredquality': '192',
             }],
-            'ffmpeg_location': ffmpeg_loc,
+            'ffmpeg_location': FFMPEG_LOC,
         }
 
     ydl_opts.update(common_opts)
@@ -83,7 +84,7 @@ def handle_non_playlist_url(ydl_opts: dict, url: str) -> None:
 
 
 def handle_playlist_url(ydl_opts: dict, url: str) -> None:
-    urls = get_urls(url)
+    urls = get_urls(url, headless=True)
     ydl_opts['no_playlist'] = True
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.download(urls)
@@ -110,17 +111,9 @@ def get_urls(url: str, headless: bool = False) -> list[str]:
         prev_height = new_height
 
     links = driver.find_elements(By.XPATH, "//a[@id='video-title']")
-    # items_xpath = ("//div[@id='contents']/ytd-item-section-renderer[@header-style][1]/div[@id='contents']"
-    #                "/ytd-playlist-video-list-renderer/div[@id='contents']/ytd-playlist-video-renderer"
-    #                "/div[@id='content']/div[@id='container']/div[@id='meta']/h3//a/@href")
 
     urls = [link.get_attribute('href') for link in links if link.get_attribute('href')]
     formatted_urls = [remove_list_param(url) for url in urls if url]
     urls = [url for url in formatted_urls if url]  # filter out empty
     driver.quit()
     return urls
-
-
-if __name__ == '__main__':
-    video_url = 'https://www.youtube.com/playlist?list=PLYUcVkkLR4_4L9d1zeco0nPoH64qt5nNv'
-    video_urls = get_urls(video_url)

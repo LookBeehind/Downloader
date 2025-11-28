@@ -1,43 +1,41 @@
 import customtkinter
+import os
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
+
+from config import SETTINGS_FILE, PLAYLISTS_FILE
 from downloader import *
 
+customtkinter.set_appearance_mode("System")
 customtkinter.set_default_color_theme("blue")
 
 
 class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
+
+        # --- Window Setup ---
+        self.title("YouTube Video Downloader 3000")
+        self.geometry("900x600")
+
+        self.grid_columnconfigure(0, weight=0)
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_rowconfigure(0, weight=1)
+
         self.download_details = None
         self.warning = None
         self.extension_values = ['Default', "webm", "mp4"]
 
-        self.title("YouTube Video Downloader 3000")
-
         self.load_side_bar()
         self.load_default_settings()
-
-        self.main_frame = customtkinter.CTkFrame(self, width=140, corner_radius=0, fg_color='transparent')
-        self.main_frame.grid(row=0, column=2, rowspan=4, sticky="nsew")
-
-        self.logo_label = customtkinter.CTkLabel(self.main_frame, text="Enter your URL",
-                                                 font=customtkinter.CTkFont(size=20, weight="bold"))
-        self.logo_label.grid(row=0, column=0, columnspan=3, sticky='ns', pady=20, padx=20)
-
-        self.entry = customtkinter.CTkEntry(self.main_frame, placeholder_text="URL . . .")
-        self.entry.grid(row=1, column=0, columnspan=3, sticky='ns', ipadx=100, padx=20)
-
-        self.set_properties = customtkinter.CTkSwitch(self.main_frame, text="Change options", offvalue=0)
-        self.set_properties.grid(row=2, column=1, padx=20, pady=20, sticky='w')
-
-        self.download = customtkinter.CTkButton(self.main_frame, text="Download", command=self.handle_download)
-        self.download.grid(row=2, column=2, padx=20, pady=20, sticky='e')
+        self.create_main_frame()
 
     def load_side_bar(self):
-        # create sidebar frame with widgets
-        self.sidebar_frame = customtkinter.CTkFrame(self, corner_radius=40)
-        self.sidebar_frame.grid(row=0, column=1, rowspan=4, sticky="nsew", padx=10, pady=10)
+        """Creates the sidebar on the left with settings controls"""
+        # FIXED: Sidebar MUST be in column 0
+        self.sidebar_frame = customtkinter.CTkFrame(self, width=140, corner_radius=0)
+        self.sidebar_frame.grid(row=0, column=0, rowspan=4, sticky="nsew")
+        self.sidebar_frame.grid_rowconfigure(6, weight=1)  # Push things up if needed
 
         self.logo_label = customtkinter.CTkLabel(self.sidebar_frame, text="Set Defaults",
                                                  font=customtkinter.CTkFont(size=20, weight="bold"))
@@ -54,15 +52,60 @@ class App(customtkinter.CTk):
         self.extension.grid(row=2, column=0, padx=20, pady=10)
 
         self.resolution = customtkinter.CTkOptionMenu(self.sidebar_frame,
-                                                      values=['144', '240', '360', '480', '720', '1080', '1440', '2160'],
+                                                      values=['144', '240', '360', '480', '720', '1080', '1440',
+                                                              '2160'],
                                                       command=self.get_selected_option)
         self.resolution.grid(row=3, column=0, padx=20, pady=10)
 
         self.path = customtkinter.CTkEntry(self.sidebar_frame, placeholder_text="Output Path")
-        self.path.grid(row=4, column=0, columnspan=3, padx=20, pady=10)
+        self.path.grid(row=4, column=0, padx=20, pady=10)
 
-        self.submit = customtkinter.CTkButton(self.sidebar_frame, text="Save", command=self.save_default_settings)
+        self.submit = customtkinter.CTkButton(self.sidebar_frame, text="Save Settings",
+                                              command=self.save_default_settings)
         self.submit.grid(row=5, column=0, padx=20, pady=(20, 30))
+
+    def create_main_frame(self):
+        self.main_frame = customtkinter.CTkFrame(self, corner_radius=0, fg_color='transparent')
+        self.main_frame.grid(row=0, column=1, sticky="nsew")
+
+        # --- GRID CONFIGURATION (Main Frame) ---
+        self.main_frame.grid_columnconfigure(0, weight=1)  # Left
+        self.main_frame.grid_columnconfigure(1, weight=1)  # Center
+        self.main_frame.grid_columnconfigure(2, weight=1)  # Right
+
+        # 1. Label
+        self.logo_label = customtkinter.CTkLabel(self.main_frame, text="Enter your URL",
+                                                 font=customtkinter.CTkFont(size=20, weight="bold"))
+        self.logo_label.grid(row=0, column=0, columnspan=3, sticky='s', pady=(50, 20), padx=20)
+
+        # 2. Entry
+        self.entry = customtkinter.CTkEntry(self.main_frame, placeholder_text="https://www.youtube.com/...")
+        self.entry.grid(row=1, column=0, columnspan=3, sticky='ew', padx=40, pady=20)
+
+        # 3. Bottom Controls
+        try:
+            with open(PLAYLISTS_FILE, 'r') as f:
+                self.playlists = {line.strip().split(',')[0]: line.strip().split(',')[1] for line in f.readlines()}
+        except FileNotFoundError:
+            self.playlists = {}
+
+        # A. Playlist Menu
+        self.playlist_menu = customtkinter.CTkOptionMenu(self.main_frame,
+                                                         values=list(self.playlists.keys()),
+                                                         command=self.load_playlist)
+        self.playlist_menu.grid(row=2, column=0, padx=(40, 10), pady=30, sticky='ew')
+
+        # B. Switch
+        self.set_properties = customtkinter.CTkSwitch(self.main_frame, text="Options", offvalue=0)
+        self.set_properties.grid(row=2, column=1, padx=10, pady=30)
+
+        # C. Download Button
+        self.download = customtkinter.CTkButton(self.main_frame, text="Download", command=self.handle_download)
+        self.download.grid(row=2, column=2, padx=(10, 40), pady=30, sticky='ew')
+
+    def load_playlist(self, choice):
+        self.entry.delete(0, 'end')
+        self.entry.insert(0, self.playlists[choice])
 
     def handle_download(self):
         global url
@@ -73,11 +116,17 @@ class App(customtkinter.CTk):
         elif self.set_properties.get() != 0:
             self.select_details()
         else:
-            download(url=self.entry.get(), path=self.path.get(), video_resolution=self.resolution.get(), form=self.format_select.get(), ext=self.extension.get())
+            download(
+                url=self.entry.get(),
+                path=self.path.get(),
+                video_resolution=int(self.resolution.get() or 1080),
+                form=self.format_select.get(),
+                ext=self.extension.get()
+            )
 
     def load_default_settings(self):
         try:
-            tree = ET.parse("settings.xml")
+            tree = ET.parse(SETTINGS_FILE)
             root = tree.getroot()
 
             format_value = root.find("format").text
@@ -91,7 +140,7 @@ class App(customtkinter.CTk):
             self.path.delete(0, "end")
             self.path.insert(0, output_folder_value)
 
-        except FileNotFoundError:
+        except (FileNotFoundError, AttributeError):
             pass
 
     def update_extension_options(self, choice):
@@ -142,7 +191,7 @@ class App(customtkinter.CTk):
         xml_str = minidom.parseString(ET.tostring(root)).toprettyxml(indent="  ")
 
         # Write the formatted string to an XML file
-        with open("settings.xml", "w") as xml_file:
+        with open(SETTINGS_FILE, "w") as xml_file:
             xml_file.write(xml_str)
 
         self.load_default_settings()
@@ -196,7 +245,14 @@ class DownloadDetails(customtkinter.CTkToplevel):
 
     def handle_download(self):
         global url
-        download(url=url, path=self.path.get(), video_resolution=self.resolution.get(), ext=self.extension.get(), form=self.format_select.get())
+        download(
+            url=url,
+            path=self.path.get(),
+            video_resolution=int(self.resolution.get() or 0),
+            ext=self.extension.get(),
+            form=self.format_select.get()
+        )
+        self.destroy()
 
     def update_extension_options(self, choice):
         selected_option = self.get_selected_option(choice)
@@ -219,7 +275,7 @@ class DownloadDetails(customtkinter.CTkToplevel):
 
     def load_default_settings(self):
         try:
-            tree = ET.parse("settings.xml")
+            tree = ET.parse(SETTINGS_FILE)
             root = tree.getroot()
 
             format_value = root.find("format").text
