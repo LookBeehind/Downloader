@@ -15,7 +15,7 @@ Run the `main.py` or the compiled exe file.
   with no audio, or `Audio` - with no video.
 * Your settings will be saved in an XML document, so you can download a video multiple times, 
   without specifying the properties each time, or you can switch the radio button, to set other properties.
-* If a video is not getting downloaded, ensure that the resolution you selected is not too low,  
+* If a video is not getting downloaded, ensure that the resolution you selected is not too low, 
   and it is actually available for that video.
 
 ## Link specification: 
