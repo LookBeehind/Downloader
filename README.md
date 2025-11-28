@@ -17,6 +17,8 @@ Run the `main.py` or the compiled exe file.
   without specifying the properties each time, or you can switch the radio button, to set other properties.
 * If a video is not getting downloaded, ensure that the resolution you selected is not too low, 
   and it is actually available for that video.
+* Each time you download a video, it remembers this video, and the next time you download the same playlist/video,
+  it will start downloading from the next video, skipping the already downloaded ones.
 
 ## Link specification: 
 

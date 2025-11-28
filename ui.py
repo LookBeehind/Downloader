@@ -119,7 +119,7 @@ class App(customtkinter.CTk):
             download(
                 url=self.entry.get(),
                 path=self.path.get(),
-                video_resolution=int(self.resolution.get() or 1080),
+                video_resolution=self.resolution.get(),
                 form=self.format_select.get(),
                 ext=self.extension.get()
             )
@@ -248,7 +248,7 @@ class DownloadDetails(customtkinter.CTkToplevel):
         download(
             url=url,
             path=self.path.get(),
-            video_resolution=int(self.resolution.get() or 0),
+            video_resolution=self.resolution.get(),
             ext=self.extension.get(),
             form=self.format_select.get()
         )
